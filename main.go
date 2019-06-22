@@ -22,6 +22,7 @@ func getTodosHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	defer db.Close()
 	stmt, err := db.Prepare("SELECT id, title, status FROM todos;")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -53,6 +54,7 @@ func getTodosByIdHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
+	defer db.Close()
 	stmt, err := db.Prepare("SELECT id, title, status FROM todos WHERE id=$1;")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
@@ -80,6 +82,7 @@ func postTodosHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
+	defer db.Close()
 	stmt, err := db.Prepare("INSERT INTO todos (title, status) VALUES ($1, $2) RETURNING id")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
@@ -102,8 +105,9 @@ func deleteTodosByIdHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
+	defer db.Close()
 
-	stmt, err := db.Prepare("DELECT FROM todos WHERE id=$1;")
+	stmt, err := db.Prepare("DELETE FROM todos WHERE id=$1;")
 	if err != nil {
 		fmt.Println("err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
@@ -115,7 +119,7 @@ func deleteTodosByIdHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, "removed")
+	c.JSON(http.StatusOK, gin.H{"status":"success"})
 }
 
 func main() {
